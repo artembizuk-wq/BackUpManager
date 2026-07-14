@@ -14,7 +14,7 @@ namespace _1СBackUpManager
             //Application.Run(new MainForm());
             try
             {
-                int i = 0;
+             
                 ApplicationConfiguration.Initialize();
                 Application.Run(new MainForm());
 

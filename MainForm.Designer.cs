@@ -43,12 +43,16 @@
             tableLayoutPanel1 = new TableLayoutPanel();
             panel1 = new Panel();
             rtbLog = new RichTextBox();
+            tableLayoutPanel2 = new TableLayoutPanel();
             progressBarBackup = new ProgressBar();
+            lblstatus = new Label();
+            labelpersent = new Label();
             groupBox1.SuspendLayout();
             groupBox2.SuspendLayout();
             groupBox3.SuspendLayout();
             tableLayoutPanel1.SuspendLayout();
             panel1.SuspendLayout();
+            tableLayoutPanel2.SuspendLayout();
             SuspendLayout();
             // 
             // btnRefresh
@@ -185,19 +189,17 @@
             tableLayoutPanel1.Controls.Add(groupBox3, 1, 0);
             tableLayoutPanel1.Controls.Add(panel1, 0, 1);
             tableLayoutPanel1.Controls.Add(rtbLog, 0, 3);
-            tableLayoutPanel1.Controls.Add(progressBarBackup, 0, 2);
+            tableLayoutPanel1.Controls.Add(tableLayoutPanel2, 0, 2);
             tableLayoutPanel1.Dock = DockStyle.Fill;
             tableLayoutPanel1.Location = new Point(0, 0);
             tableLayoutPanel1.Name = "tableLayoutPanel1";
-            tableLayoutPanel1.RowCount = 4;
+            tableLayoutPanel1.RowCount = 3;
             tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Absolute, 224F));
             tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Absolute, 40F));
-            tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Absolute, 15F));
             tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Absolute, 25F));
-            tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Absolute, 20F));
+            tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Absolute, 21F));
             tableLayoutPanel1.Size = new Size(684, 461);
             tableLayoutPanel1.TabIndex = 10;
-            tableLayoutPanel1.Paint += tableLayoutPanel1_Paint;
             // 
             // panel1
             // 
@@ -218,23 +220,59 @@
             rtbLog.Dock = DockStyle.Fill;
             rtbLog.Font = new Font("Consolas", 10F);
             rtbLog.HideSelection = false;
-            rtbLog.Location = new Point(3, 282);
+            rtbLog.Location = new Point(3, 292);
             rtbLog.Name = "rtbLog";
             rtbLog.ReadOnly = true;
-            rtbLog.Size = new Size(678, 176);
+            rtbLog.Size = new Size(678, 166);
             rtbLog.TabIndex = 11;
             rtbLog.Text = "";
             rtbLog.WordWrap = false;
             // 
+            // tableLayoutPanel2
+            // 
+            tableLayoutPanel2.ColumnCount = 3;
+            tableLayoutPanel1.SetColumnSpan(tableLayoutPanel2, 2);
+            tableLayoutPanel2.ColumnStyles.Add(new ColumnStyle());
+            tableLayoutPanel2.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+            tableLayoutPanel2.ColumnStyles.Add(new ColumnStyle());
+            tableLayoutPanel2.Controls.Add(progressBarBackup, 1, 0);
+            tableLayoutPanel2.Controls.Add(lblstatus, 0, 0);
+            tableLayoutPanel2.Controls.Add(labelpersent, 2, 0);
+            tableLayoutPanel2.Location = new Point(3, 267);
+            tableLayoutPanel2.Name = "tableLayoutPanel2";
+            tableLayoutPanel2.RowCount = 1;
+            tableLayoutPanel2.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+            tableLayoutPanel2.Size = new Size(678, 19);
+            tableLayoutPanel2.TabIndex = 12;
+            // 
             // progressBarBackup
             // 
-            tableLayoutPanel1.SetColumnSpan(progressBarBackup, 2);
             progressBarBackup.Dock = DockStyle.Fill;
-            progressBarBackup.Location = new Point(3, 267);
+            progressBarBackup.Location = new Point(172, 3);
             progressBarBackup.Name = "progressBarBackup";
-            progressBarBackup.Size = new Size(678, 9);
+            progressBarBackup.Size = new Size(480, 13);
             progressBarBackup.Style = ProgressBarStyle.Continuous;
             progressBarBackup.TabIndex = 12;
+            // 
+            // lblstatus
+            // 
+            lblstatus.Dock = DockStyle.Fill;
+            lblstatus.Font = new Font("Segoe UI", 8.25F, FontStyle.Regular, GraphicsUnit.Point, 204);
+            lblstatus.Location = new Point(3, 0);
+            lblstatus.Name = "lblstatus";
+            lblstatus.Size = new Size(163, 19);
+            lblstatus.TabIndex = 8;
+            lblstatus.Click += label2_Click;
+            // 
+            // labelpersent
+            // 
+            labelpersent.AutoSize = true;
+            labelpersent.Dock = DockStyle.Fill;
+            labelpersent.Location = new Point(658, 0);
+            labelpersent.Name = "labelpersent";
+            labelpersent.Size = new Size(17, 19);
+            labelpersent.TabIndex = 13;
+            labelpersent.Text = "%";
             // 
             // MainForm
             // 
@@ -256,6 +294,8 @@
             groupBox3.PerformLayout();
             tableLayoutPanel1.ResumeLayout(false);
             panel1.ResumeLayout(false);
+            tableLayoutPanel2.ResumeLayout(false);
+            tableLayoutPanel2.PerformLayout();
             ResumeLayout(false);
         }
 
@@ -277,5 +317,8 @@
         private Panel panel1;
         private RichTextBox rtbLog;
         private ProgressBar progressBarBackup;
+        private Label lblstatus;
+        private TableLayoutPanel tableLayoutPanel2;
+        private Label labelpersent;
     }
 }

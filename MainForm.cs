@@ -31,7 +31,7 @@ namespace _1СBackUpManager
             }
             catch (Exception ex)
             {
-                Log($"Не вдалося завантажити налаштування: {ex.Message}",LogType.Error);
+                Log($"Не вдалося завантажити налаштування: {ex.Message}", LogType.Error);
             }
             finally { _loadingSettings = false; }
 
@@ -41,7 +41,7 @@ namespace _1СBackUpManager
         // ====================================================
         // Допоміжні методи
         // ====================================================
-        private void Log(string message,LogType type = LogType.Info)
+        private void Log(string message, LogType type = LogType.Info)
         {
             {
                 Color color = type switch
@@ -101,10 +101,9 @@ namespace _1СBackUpManager
             {
                 checkedListBox1.Items.Add(item);
             }
-            rtbLog.AppendText($"Знайдено {bases.Count} баз.{Environment.NewLine}");
         }
 
-        private void btnBackup_Click(object sender, EventArgs e)
+        private async void btnBackup_Click(object sender, EventArgs e)
         {
             if (checkedListBox1.CheckedItems.Count == 0)
             {
@@ -112,31 +111,73 @@ namespace _1СBackUpManager
                 return;
             }
 
-            Log("Початок резервного копіювання...");
-            BackupOptions options = GetBackupOptions();
+            
+            
+            btnBackup.Enabled = false;
+            btnRefresh.Enabled = false;
+            checkedListBox1.Enabled = false;
 
-            progressBarBackup.Minimum = 0;
-            progressBarBackup.Maximum = checkedListBox1.CheckedItems.Count;
-            progressBarBackup.Value = 0;
-
-            foreach (BaseInfo baseInfo in checkedListBox1.CheckedItems)
+            try
             {
-                Log($"Починаю резервне копіювання {baseInfo.Name}...");
+                Log("Початок резервного копіювання...");
+                BackupOptions options = GetBackupOptions();
 
-                try
+
+                if(options.BackupType == BackupType.DT)
                 {
-                    string backupFilePath = _backupService.Backup(baseInfo, options);
-                    Log($"✔ {baseInfo.Name} успішно.", LogType.Success);
-                    Log($"Файл: {backupFilePath}", LogType.Success);
+                    progressBarBackup.Style = ProgressBarStyle.Marquee;
+                    lblstatus.Text = "Створення резервної копії...";
+                    labelpersent.Text = "";
                 }
-                catch (Exception ex)
+                else
                 {
-                    Log($"✖ {baseInfo.Name}: {ex.Message}",LogType.Error);
+                    progressBarBackup.Style = ProgressBarStyle.Blocks;
+                    progressBarBackup.Minimum = 0;
+                    progressBarBackup.Maximum = 100;
+                    progressBarBackup.Value = 0;
                 }
-                progressBarBackup.Value++;
+               
+
+                Progress<BackupProgress> progress =
+                   new(p =>
+                    {
+                        progressBarBackup.Value = p.Percent;
+                        lblstatus.Text = p.Message;
+                        labelpersent.Text = $"{p.Percent}%";
+                    });
+
+                foreach (BaseInfo baseInfo in checkedListBox1.CheckedItems)
+                {
+                    Log($"Починаю резервне копіювання {baseInfo.Name}...");
+                    if (options.BackupType == BackupType.CD)
+                    {
+                        progressBarBackup.Value = 0;
+                    }
+
+                    try
+                    {
+                        string backupFilePath = await _backupService.BackupAsync(baseInfo, options, progress);
+                        Log($"✔ {baseInfo.Name} успішно.", LogType.Success);
+                        Log($"Файл: {backupFilePath}", LogType.Success);
+                    }
+                    catch (Exception ex)
+                    {
+                        Log($"✖ {baseInfo.Name}: {ex.Message}", LogType.Error);
+                    }
+                   
+                }
+                progressBarBackup.Value = 100;
+                Log("Завершення резервного копіювання");
             }
-            Log("Завершення резервного копіювання");
 
+            finally
+            {
+                btnBackup.Enabled = true;
+                btnRefresh.Enabled = true;
+                checkedListBox1.Enabled = true;
+                progressBarBackup.Style = ProgressBarStyle.Blocks;
+                progressBarBackup.MarqueeAnimationSpeed = 0;
+            }
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -160,7 +201,7 @@ namespace _1СBackUpManager
             SaveSettings();
         }
 
-        private void tableLayoutPanel1_Paint(object sender, PaintEventArgs e)
+        private void label2_Click(object sender, EventArgs e)
         {
 
         }

@@ -12,12 +12,12 @@ namespace _1СBackUpManager.Services
         private const string DatabaseFileName = "1Cv8.1CD";
         private const string OneCExecutable =@"C:\Program Files\1cv8\8.3.18.1334\bin\1cv8.exe";
 
-        public string Backup(BaseInfo baseInfo, BackupOptions options)
+        public async Task<string> BackupAsync(BaseInfo baseInfo, BackupOptions options)
         {
             ValidateBackupFolder(options);
             ValidateDatabase(baseInfo);
             ValidateDatabaseNotInUse(baseInfo);
-            string backupFilePath = CreateBackup(baseInfo, options);
+            string backupFilePath = await CreateBackupAsync(baseInfo, options);
 
             if (options.CompressToZip)
             {
@@ -26,22 +26,22 @@ namespace _1СBackUpManager.Services
             return backupFilePath;
         }
 
-        private string CreateBackup(BaseInfo baseInfo, BackupOptions options)
+        private async Task<string> CreateBackupAsync(BaseInfo baseInfo, BackupOptions options)
         {
             switch (options.BackupType)
             {
                 case BackupType.CD:
-                    return BackupCd(baseInfo, options);
+                    return await BackupCdAsync(baseInfo, options);
 
                 case BackupType.DT:
-                    return BackupDt(baseInfo, options);
+                    return await BackupDtAsync(baseInfo, options);
 
                 default:
                     throw new ArgumentOutOfRangeException(nameof(options.BackupType));
             }
         }
 
-        private string BackupDt(BaseInfo baseInfo, BackupOptions options)
+        private async Task<string> BackupDtAsync(BaseInfo baseInfo, BackupOptions options)
         {
             string backupFileName = CreateBackupFileName(baseInfo, options.BackupType);
             string backupFilePath = Path.Combine(options.BackupFolder, backupFileName);
@@ -60,7 +60,7 @@ namespace _1СBackUpManager.Services
                 throw new InvalidOperationException("Не вдалося запустити 1С Designer.");
             }
 
-            process.WaitForExit();
+            await process.WaitForExitAsync();
 
             if (process.ExitCode != 0)
             {
@@ -90,15 +90,17 @@ namespace _1СBackUpManager.Services
            
         }
 
-        private string BackupCd(BaseInfo baseInfo, BackupOptions options)
+        private async Task<string> BackupCdAsync(BaseInfo baseInfo, BackupOptions options)
         {
-            string databaseFile = GetDatabaseFile(baseInfo);
-            string backupFileName = CreateBackupFileName(baseInfo, options.BackupType);
-            string backupFilePath = Path.Combine(options.BackupFolder, backupFileName);
+            return await Task.Run(() =>
+            {
+                string databaseFile = GetDatabaseFile(baseInfo);
+                string backupFileName = CreateBackupFileName(baseInfo, options.BackupType);
+                string backupFilePath = Path.Combine(options.BackupFolder, backupFileName);
 
-            File.Copy(databaseFile, backupFilePath, false);
-
-            return backupFilePath;
+                File.Copy(databaseFile, backupFilePath, false);
+                return backupFilePath;
+            });        
         }
 
         private string GetDatabaseFile(BaseInfo baseInfo)

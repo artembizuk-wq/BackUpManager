@@ -170,6 +170,7 @@ namespace _1СBackUpManager
                 Log("Завершення резервного копіювання");
             }
 
+
             finally
             {
                 btnBackup.Enabled = true;

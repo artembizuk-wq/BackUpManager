@@ -80,12 +80,15 @@ namespace _1СBackUpManager.Services
         }
         private string BuildDesignerArguments( BaseInfo baseInfo,string dtFilePath)
         {
+            CredentialService credentialService = new();
+            Credentials credentials = credentialService.Load();
+
             return string.Join(" ",
             [
                 "DESIGNER",
                 $"/F \"{baseInfo.Path}\"",
-                $"/N Бизюк",
-                $"/P Marina23",
+                $"/N {credentials.UserName}",
+                $"/P {credentials.Password}",
                 $"/DumpIB \"{dtFilePath}\"",
                 "/DisableStartupMessages"
             ]

@@ -1,3 +1,6 @@
+using _1СBackUpManager.Models;
+using _1СBackUpManager.Services;
+
 namespace _1СBackUpManager
 {
     internal static class Program
@@ -14,9 +17,9 @@ namespace _1СBackUpManager
             //Application.Run(new MainForm());
             try
             {
-             
+
                 ApplicationConfiguration.Initialize();
-                Application.Run(new MainForm());
+                Application.Run(new MainForm());  
 
             }
             catch (Exception ex)

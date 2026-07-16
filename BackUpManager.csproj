@@ -19,11 +19,20 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="credentials.dat" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Folder Include="Helpers\" />
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="1СBackUpManager.slnx" />
+    <Content Include="1СBackUpManager.slnx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="credentials.dat">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
   <ItemGroup>

@@ -12,12 +12,12 @@ namespace _1СBackUpManager.Services
         private const string DatabaseFileName = "1Cv8.1CD";
         private const string OneCExecutable =@"C:\Program Files\1cv8\8.3.18.1334\bin\1cv8.exe";
 
-        public async Task<string> BackupAsync(BaseInfo baseInfo, BackupOptions options,IProgress<BackupProgress>?progress = null)
+        public async Task<string> BackupAsync(BaseInfo baseInfo, BackupOptions options,IProgress<BackupProgress>?progress = null,CancellationToken cancellationToken = default)
         {
             ValidateBackupFolder(options);
             ValidateDatabase(baseInfo);
             ValidateDatabaseNotInUse(baseInfo);
-            string backupFilePath = await CreateBackupAsync(baseInfo, options, progress);
+            string backupFilePath = await CreateBackupAsync(baseInfo, options, progress, cancellationToken);
 
             if (options.CompressToZip)
             {
@@ -26,57 +26,86 @@ namespace _1СBackUpManager.Services
             return backupFilePath;
         }
 
-        private async Task<string> CreateBackupAsync(BaseInfo baseInfo, BackupOptions options, IProgress<BackupProgress>? progress = null)
+        private async Task<string> CreateBackupAsync(BaseInfo baseInfo, BackupOptions options, IProgress<BackupProgress>? progress = null, CancellationToken cancellationToken = default)
         {
             switch (options.BackupType)
             {
                 case BackupType.CD:
-                    return await BackupCdAsync(baseInfo, options, progress);
+                    return await BackupCdAsync(baseInfo, options, progress, cancellationToken);
 
                 case BackupType.DT:
-                    return await BackupDtAsync(baseInfo, options, progress);
+                    return await BackupDtAsync(baseInfo, options, progress, cancellationToken);
 
                 default:
                     throw new ArgumentOutOfRangeException(nameof(options.BackupType));
             }
         }
 
-        private async Task<string> BackupDtAsync(BaseInfo baseInfo, BackupOptions options, IProgress<BackupProgress>? progress = null)
+        private async Task<string> BackupDtAsync(BaseInfo baseInfo, BackupOptions options, IProgress<BackupProgress>? progress = null, CancellationToken cancellationToken = default)
         {
             string backupFileName = CreateBackupFileName(baseInfo, options.BackupType);
             string backupFilePath = Path.Combine(options.BackupFolder, backupFileName);
             string arguments = BuildDesignerArguments(baseInfo,backupFilePath);
 
             ProcessStartInfo startInfo = new()
-            {
-                FileName = OneCExecutable,
-                Arguments = arguments,
-                UseShellExecute = false,
-                CreateNoWindow = true,
-                WindowStyle = ProcessWindowStyle.Hidden
-            };
+                {
+                    FileName = OneCExecutable,
+                    Arguments = arguments,
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
+                    WindowStyle = ProcessWindowStyle.Hidden
+                };
 
-            using Process? process = Process.Start(startInfo);
+                using Process? process = Process.Start(startInfo);
 
-            if (process == null)
-            {
-                throw new InvalidOperationException("Не вдалося запустити 1С Designer.");
+                try
+                {
+                    if (process == null)
+                {
+                    throw new InvalidOperationException("Не вдалося запустити 1С Designer.");
+                }
+
+                await process.WaitForExitAsync(cancellationToken);
+
+                if (process.ExitCode != 0)
+                {
+                    throw new InvalidOperationException($"Designer завершився з кодом {process.ExitCode}.");
+                }
+
+                if (!File.Exists(backupFilePath))
+                {
+                    throw new FileNotFoundException(
+                        "Файл резервної копії не був створений.",
+                        backupFilePath);
+                }
+                return backupFilePath;
             }
-
-            await process.WaitForExitAsync();
-
-            if (process.ExitCode != 0)
+            catch (OperationCanceledException)
             {
-                throw new InvalidOperationException( $"Designer завершився з кодом {process.ExitCode}.");
-            }
 
-            if (!File.Exists(backupFilePath))
-            {
-                throw new FileNotFoundException(
-                    "Файл резервної копії не був створений.",
-                    backupFilePath);
+                if(process != null && !process.HasExited)
+                {
+                    process.Kill();
+                    await process.WaitForExitAsync();
+                }
+
+                string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(backupFilePath);
+
+                foreach (string file in Directory.GetFiles(options.BackupFolder, $"{fileNameWithoutExtension}.*"))
+                {
+                    try
+                    {
+                        File.Delete(file);
+                    }
+                    catch
+                    {
+                        // Можна залогувати або просто проігнорувати
+                    }
+                }
+
+
+                throw;
             }
-            return backupFilePath;
         }
         private string BuildDesignerArguments( BaseInfo baseInfo,string dtFilePath)
         {
@@ -96,14 +125,16 @@ namespace _1СBackUpManager.Services
            
         }
 
-        private async Task<string> BackupCdAsync(BaseInfo baseInfo, BackupOptions options, IProgress<BackupProgress>? progress = null)
+        private async Task<string> BackupCdAsync(BaseInfo baseInfo, BackupOptions options, IProgress<BackupProgress>? progress = null, CancellationToken cancellationToken = default)
         {
-          
+           
                 string databaseFile = GetDatabaseFile(baseInfo);
                 string backupFileName = CreateBackupFileName(baseInfo, options.BackupType);
                 string backupFilePath = Path.Combine(options.BackupFolder, backupFileName);
 
-                await using FileStream source = new(
+                try
+                {
+                    await using FileStream source = new(
                    databaseFile,
                    FileMode.Open,
                    FileAccess.Read,
@@ -126,35 +157,45 @@ namespace _1СBackUpManager.Services
                 long copiedBytes = 0;
                 int bytesRead;
 
-            int lastPercent = -1;
+                int lastPercent = -1;
 
-            while ((bytesRead = await source.ReadAsync(buffer)) > 0)
-            {
-                await destination.WriteAsync(buffer.AsMemory(0, bytesRead));
-
-                copiedBytes += bytesRead;
-
-                int percent = (int)(copiedBytes * 100 / totalBytes);
-
-                if (percent != lastPercent)
+                while ((bytesRead = await source.ReadAsync(buffer, cancellationToken)) > 0)
                 {
-                    lastPercent = percent;
+                    await destination.WriteAsync(buffer.AsMemory(0, bytesRead), cancellationToken);
 
-                    progress?.Report(new BackupProgress
+                    copiedBytes += bytesRead;
+
+                    int percent = (int)(copiedBytes * 100 / totalBytes);
+
+                    if (percent != lastPercent)
                     {
-                        Percent = percent,
-                        Message = $"Копіювання {baseInfo.Name}"
-                    });
+                        lastPercent = percent;
+
+                        progress?.Report(new BackupProgress
+                        {
+                            Percent = percent,
+                            Message = $"Копіювання {baseInfo.Name}"
+                        });
+                    }
                 }
+
+                progress?.Report(new BackupProgress
+                {
+                    Percent = 100,
+                    Message = "Копіювання завершено"
+                });
+
+                return backupFilePath;
             }
-
-            progress?.Report(new BackupProgress
+            catch (OperationCanceledException)
             {
-                Percent = 100,
-                Message = "Копіювання завершено"
-            });
+                if (File.Exists(backupFilePath))
+                {
+                    File.Delete(backupFilePath);
+                }
 
-            return backupFilePath;        
+                throw;
+            }
         }
 
         private string GetDatabaseFile(BaseInfo baseInfo)

@@ -2,6 +2,8 @@ using _1СBackUpManager.Enums;
 using _1СBackUpManager.Models;
 using _1СBackUpManager.Services;
 
+
+
 namespace _1СBackUpManager
 {
     public partial class MainForm : Form
@@ -10,6 +12,7 @@ namespace _1СBackUpManager
         private bool _loadingSettings;
         private readonly SettingsService _settingsService = new SettingsService();
         private readonly BackupService _backupService = new BackupService();
+        private CancellationTokenSource? _cts;
 
         public MainForm()
         {
@@ -93,37 +96,41 @@ namespace _1СBackUpManager
         // ====================================================
         private void RefreshBaseList()
         {
-            checkedListBox1.Items.Clear();
+            clbBases.Items.Clear();
 
             BaseFinder basesFinder = new BaseFinder();
             List<BaseInfo> bases = basesFinder.FindBases();
             foreach (var item in bases)
             {
-                checkedListBox1.Items.Add(item);
+                clbBases.Items.Add(item);
             }
         }
 
         private async void btnBackup_Click(object sender, EventArgs e)
         {
-            if (checkedListBox1.CheckedItems.Count == 0)
+            if (clbBases.CheckedItems.Count == 0)
             {
                 Log("Не вибрано жодної бази.");
                 return;
             }
 
-            
-            
+
+
             btnBackup.Enabled = false;
             btnRefresh.Enabled = false;
-            checkedListBox1.Enabled = false;
+            btnCancel.Enabled = true;
+            clbBases.Enabled = false;
+            bool canceled = false;
+            _cts = new CancellationTokenSource();
 
             try
             {
+              
                 Log("Початок резервного копіювання...");
                 BackupOptions options = GetBackupOptions();
 
 
-                if(options.BackupType == BackupType.DT)
+                if (options.BackupType == BackupType.DT)
                 {
                     progressBarBackup.Style = ProgressBarStyle.Marquee;
                     lblstatus.Text = "Створення резервної копії...";
@@ -136,7 +143,7 @@ namespace _1СBackUpManager
                     progressBarBackup.Maximum = 100;
                     progressBarBackup.Value = 0;
                 }
-               
+
 
                 Progress<BackupProgress> progress =
                    new(p =>
@@ -146,7 +153,7 @@ namespace _1СBackUpManager
                         labelpersent.Text = $"{p.Percent}%";
                     });
 
-                foreach (BaseInfo baseInfo in checkedListBox1.CheckedItems)
+                foreach (BaseInfo baseInfo in clbBases.CheckedItems)
                 {
                     Log($"Починаю резервне копіювання {baseInfo.Name}...");
                     if (options.BackupType == BackupType.CD)
@@ -156,18 +163,27 @@ namespace _1СBackUpManager
 
                     try
                     {
-                        string backupFilePath = await _backupService.BackupAsync(baseInfo, options, progress);
+                        string backupFilePath = await _backupService.BackupAsync(baseInfo, options, progress, _cts.Token);
                         Log($"✔ {baseInfo.Name} успішно.", LogType.Success);
                         Log($"Файл: {backupFilePath}", LogType.Success);
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        Log($"⏹ Резервне копіювання {baseInfo.Name} скасовано.",LogType.Error);
+                        canceled = true;
+                        break;
                     }
                     catch (Exception ex)
                     {
                         Log($"✖ {baseInfo.Name}: {ex.Message}", LogType.Error);
                     }
-                   
+
                 }
-                progressBarBackup.Value = 100;
-                Log("Завершення резервного копіювання");
+                if (!canceled)
+                {
+                    progressBarBackup.Value = 100;
+                    Log("Завершення резервного копіювання");
+                }
             }
 
 
@@ -175,9 +191,16 @@ namespace _1СBackUpManager
             {
                 btnBackup.Enabled = true;
                 btnRefresh.Enabled = true;
-                checkedListBox1.Enabled = true;
+                btnCancel.Enabled = false;
+                clbBases.Enabled = true;
                 progressBarBackup.Style = ProgressBarStyle.Blocks;
                 progressBarBackup.MarqueeAnimationSpeed = 0;
+                progressBarBackup.Value = 0;
+                lblstatus.Text = "";
+                labelpersent.Text = "";
+
+                _cts.Dispose();
+                _cts = null;
             }
         }
 
@@ -205,6 +228,11 @@ namespace _1СBackUpManager
         private void label2_Click(object sender, EventArgs e)
         {
 
+        }
+
+        private void buttonCancel_Click(object sender, EventArgs e)
+        {
+            _cts?.Cancel();
         }
     }
 }

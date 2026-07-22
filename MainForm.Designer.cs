@@ -40,8 +40,9 @@
             rbCD = new RadioButton();
             rbDT = new RadioButton();
             groupBox2 = new GroupBox();
-            panel1 = new Panel();
+            flowLayoutPanel1 = new FlowLayoutPanel();
             btnCancel = new Button();
+            panel1 = new Panel();
             groupBox3 = new GroupBox();
             tableLayoutPanel1 = new TableLayoutPanel();
             rtbLog = new RichTextBox();
@@ -51,7 +52,7 @@
             labelpersent = new Label();
             groupBox1.SuspendLayout();
             groupBox2.SuspendLayout();
-            panel1.SuspendLayout();
+            flowLayoutPanel1.SuspendLayout();
             groupBox3.SuspendLayout();
             tableLayoutPanel1.SuspendLayout();
             tableLayoutPanel2.SuspendLayout();
@@ -59,41 +60,42 @@
             // 
             // btnRefresh
             // 
-            btnRefresh.Dock = DockStyle.Right;
             btnRefresh.FlatAppearance.BorderSize = 0;
             btnRefresh.FlatAppearance.MouseDownBackColor = Color.Silver;
             btnRefresh.FlatAppearance.MouseOverBackColor = Color.Gainsboro;
             btnRefresh.Font = new Font("Segoe UI Semibold", 9F, FontStyle.Regular, GraphicsUnit.Point, 204);
             btnRefresh.Image = (Image)resources.GetObject("btnRefresh.Image");
-            btnRefresh.Location = new Point(300, 0);
+            btnRefresh.Location = new Point(245, 3);
             btnRefresh.Name = "btnRefresh";
-            btnRefresh.Size = new Size(30, 30);
+            btnRefresh.Size = new Size(25, 25);
             btnRefresh.TabIndex = 0;
             btnRefresh.UseVisualStyleBackColor = true;
             btnRefresh.Click += button1_Click;
             // 
             // clbBases
             // 
+            clbBases.Anchor = AnchorStyles.None;
             clbBases.CheckOnClick = true;
-            clbBases.Dock = DockStyle.Bottom;
             clbBases.FormattingEnabled = true;
-            clbBases.Location = new Point(3, 49);
+            clbBases.Location = new Point(3, 51);
             clbBases.Name = "clbBases";
-            clbBases.Size = new Size(330, 166);
+            clbBases.Size = new Size(333, 166);
             clbBases.TabIndex = 1;
+            clbBases.SelectedIndexChanged += clbBases_SelectedIndexChanged;
             // 
             // btnBackup
             // 
-            btnBackup.Dock = DockStyle.Left;
+            btnBackup.AutoSize = true;
             btnBackup.Font = new Font("Segoe UI", 8F);
             btnBackup.Image = (Image)resources.GetObject("btnBackup.Image");
-            btnBackup.ImageAlign = ContentAlignment.MiddleRight;
-            btnBackup.Location = new Point(0, 0);
+            btnBackup.ImageAlign = ContentAlignment.MiddleLeft;
+            btnBackup.Location = new Point(3, 3);
             btnBackup.Name = "btnBackup";
-            btnBackup.Size = new Size(120, 30);
+            btnBackup.Padding = new Padding(4, 0, 4, 0);
+            btnBackup.Size = new Size(133, 25);
             btnBackup.TabIndex = 2;
             btnBackup.Text = "Створити backup";
-            btnBackup.TextAlign = ContentAlignment.MiddleLeft;
+            btnBackup.TextImageRelation = TextImageRelation.ImageBeforeText;
             btnBackup.UseVisualStyleBackColor = true;
             btnBackup.Click += btnBackup_Click;
             // 
@@ -169,6 +171,7 @@
             // 
             // groupBox2
             // 
+            groupBox2.Controls.Add(flowLayoutPanel1);
             groupBox2.Controls.Add(panel1);
             groupBox2.Controls.Add(clbBases);
             groupBox2.Dock = DockStyle.Fill;
@@ -180,29 +183,40 @@
             groupBox2.TabStop = false;
             groupBox2.Text = "Бази даних";
             // 
-            // panel1
+            // flowLayoutPanel1
             // 
-            panel1.Controls.Add(btnCancel);
-            panel1.Controls.Add(btnBackup);
-            panel1.Controls.Add(btnRefresh);
-            panel1.Dock = DockStyle.Top;
-            panel1.Location = new Point(3, 19);
-            panel1.Name = "panel1";
-            panel1.Size = new Size(330, 30);
-            panel1.TabIndex = 3;
+            flowLayoutPanel1.AutoSize = true;
+            flowLayoutPanel1.Controls.Add(btnBackup);
+            flowLayoutPanel1.Controls.Add(btnCancel);
+            flowLayoutPanel1.Controls.Add(btnRefresh);
+            flowLayoutPanel1.Location = new Point(3, 13);
+            flowLayoutPanel1.Name = "flowLayoutPanel1";
+            flowLayoutPanel1.Size = new Size(330, 31);
+            flowLayoutPanel1.TabIndex = 4;
+            flowLayoutPanel1.WrapContents = false;
             // 
             // btnCancel
             // 
+            btnCancel.AutoSize = true;
             btnCancel.Image = (Image)resources.GetObject("btnCancel.Image");
-            btnCancel.ImageAlign = ContentAlignment.MiddleRight;
-            btnCancel.Location = new Point(122, 0);
+            btnCancel.ImageAlign = ContentAlignment.MiddleLeft;
+            btnCancel.Location = new Point(142, 3);
             btnCancel.Name = "btnCancel";
-            btnCancel.Size = new Size(85, 30);
+            btnCancel.Padding = new Padding(4, 0, 4, 0);
+            btnCancel.Size = new Size(97, 25);
             btnCancel.TabIndex = 3;
             btnCancel.Text = "Скасувати";
-            btnCancel.TextAlign = ContentAlignment.MiddleLeft;
+            btnCancel.TextImageRelation = TextImageRelation.ImageBeforeText;
             btnCancel.UseVisualStyleBackColor = true;
             btnCancel.Click += buttonCancel_Click;
+            // 
+            // panel1
+            // 
+            panel1.Dock = DockStyle.Top;
+            panel1.Location = new Point(3, 19);
+            panel1.Name = "panel1";
+            panel1.Size = new Size(330, 22);
+            panel1.TabIndex = 3;
             // 
             // groupBox3
             // 
@@ -294,13 +308,14 @@
             // 
             // labelpersent
             // 
+            labelpersent.AutoSize = true;
             labelpersent.Dock = DockStyle.Fill;
             labelpersent.Location = new Point(658, 0);
             labelpersent.Name = "labelpersent";
             labelpersent.Size = new Size(17, 19);
             labelpersent.TabIndex = 13;
             labelpersent.Text = "%";
-            labelpersent.TextAlign = ContentAlignment.MiddleRight;
+            labelpersent.TextAlign = ContentAlignment.MiddleLeft;
             // 
             // MainForm
             // 
@@ -318,11 +333,14 @@
             groupBox1.ResumeLayout(false);
             groupBox1.PerformLayout();
             groupBox2.ResumeLayout(false);
-            panel1.ResumeLayout(false);
+            groupBox2.PerformLayout();
+            flowLayoutPanel1.ResumeLayout(false);
+            flowLayoutPanel1.PerformLayout();
             groupBox3.ResumeLayout(false);
             groupBox3.PerformLayout();
             tableLayoutPanel1.ResumeLayout(false);
             tableLayoutPanel2.ResumeLayout(false);
+            tableLayoutPanel2.PerformLayout();
             ResumeLayout(false);
         }
 
@@ -348,5 +366,6 @@
         private Label labelpersent;
         private Panel panel1;
         private Button btnCancel;
+        private FlowLayoutPanel flowLayoutPanel1;
     }
 }

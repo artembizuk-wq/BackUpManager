@@ -8,8 +8,7 @@ namespace _1СBackUpManager.Services
 {
     internal class CredentialService
     {
-        private static readonly string FileName = Path.Combine(AppContext.BaseDirectory, "credentials.dat");
-
+       
         // 32 байти = AES-256
         private static readonly byte[] Key =
         [
@@ -38,7 +37,7 @@ namespace _1СBackUpManager.Services
             aes.Key = Key;
             aes.IV = IV;
 
-            using FileStream fs = File.Create(FileName);
+            using FileStream fs = File.Create(AppPaths.CredentialsFilePath);
             using CryptoStream crypto = new(fs, aes.CreateEncryptor(), CryptoStreamMode.Write);
 
             crypto.Write(bytes);
@@ -50,7 +49,7 @@ namespace _1СBackUpManager.Services
             aes.Key = Key;
             aes.IV = IV;
 
-            using FileStream fileStream = File.OpenRead(FileName);
+            using FileStream fileStream = File.OpenRead(AppPaths.CredentialsFilePath);
             using CryptoStream crypto = new(fileStream, aes.CreateDecryptor(), CryptoStreamMode.Read);
             using StreamReader reader = new(crypto);
 

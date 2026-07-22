@@ -9,22 +9,20 @@ namespace _1СBackUpManager.Services
 {
     internal class SettingsService
     {
-        private const string SettingsFile = "settings.json";
-
         public BackupOptions Load()
         {
-            if (!File.Exists(SettingsFile))
+            if (!File.Exists(AppPaths.SettingsFilePath))
             {
                 return new BackupOptions();
             }
          
             try
             {
-                string json = File.ReadAllText(SettingsFile);
-                BackupOptions options = JsonSerializer.Deserialize<BackupOptions>(json);
+                string json = File.ReadAllText(AppPaths.SettingsFilePath);
+                BackupOptions? options = JsonSerializer.Deserialize<BackupOptions>(json);
                 return options ?? new BackupOptions();
             }
-            catch
+            catch (Exception)
             {
                 return new BackupOptions();
             }
@@ -39,7 +37,7 @@ namespace _1СBackUpManager.Services
 
             string json = JsonSerializer.Serialize(options, serializerOptions);
 
-            File.WriteAllText(SettingsFile, json);
+            File.WriteAllText(AppPaths.SettingsFilePath, json);
         }
 
     }

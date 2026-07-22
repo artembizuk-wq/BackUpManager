@@ -1,6 +1,7 @@
 using _1СBackUpManager.Enums;
 using _1СBackUpManager.Models;
 using _1СBackUpManager.Services;
+using System.Diagnostics;
 
 
 
@@ -21,12 +22,13 @@ namespace _1СBackUpManager
 
         private void MainForm_Load(object sender, EventArgs e)
         {
+           
             try
             {
                 _loadingSettings = true;
-
+                btnCancel.Enabled = false;
                 BackupOptions options = _settingsService.Load();
-
+              
                 txtBackupFolder.Text = options.BackupFolder;
                 rbDT.Checked = options.BackupType == BackupType.DT;
                 rbCD.Checked = options.BackupType == BackupType.CD;
@@ -38,7 +40,7 @@ namespace _1СBackUpManager
             }
             finally { _loadingSettings = false; }
 
-            RefreshBaseList();
+            RefreshBaseList();   
         }
 
         // ====================================================
@@ -114,8 +116,6 @@ namespace _1СBackUpManager
                 return;
             }
 
-
-
             btnBackup.Enabled = false;
             btnRefresh.Enabled = false;
             btnCancel.Enabled = true;
@@ -125,7 +125,7 @@ namespace _1СBackUpManager
 
             try
             {
-              
+
                 Log("Початок резервного копіювання...");
                 BackupOptions options = GetBackupOptions();
 
@@ -169,7 +169,7 @@ namespace _1СBackUpManager
                     }
                     catch (OperationCanceledException)
                     {
-                        Log($"⏹ Резервне копіювання {baseInfo.Name} скасовано.",LogType.Error);
+                        Log($"⏹ Резервне копіювання {baseInfo.Name} скасовано.", LogType.Error);
                         canceled = true;
                         break;
                     }
@@ -233,6 +233,11 @@ namespace _1СBackUpManager
         private void buttonCancel_Click(object sender, EventArgs e)
         {
             _cts?.Cancel();
+        }
+
+        private void clbBases_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
         }
     }
 }

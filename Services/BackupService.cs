@@ -21,7 +21,7 @@ namespace _1СBackUpManager.Services
 
             if (options.CompressToZip)
             {
-                backupFilePath = CompressToZip(backupFilePath);
+                backupFilePath = await CompressToZipAsync(backupFilePath,progress,cancellationToken);
             }
             return backupFilePath;
         }
@@ -134,7 +134,7 @@ namespace _1СBackUpManager.Services
 
                 try
                 {
-                    await using FileStream source = new(
+                await using FileStream source = new(
                    databaseFile,
                    FileMode.Open,
                    FileAccess.Read,
@@ -149,8 +149,6 @@ namespace _1СBackUpManager.Services
                     FileShare.None,
                     bufferSize: 81920,
                     useAsync: true);
-
-                //await source.CopyToAsync(destination);
 
                 byte[] buffer = new byte[4 * 1024 * 1024];
                 long totalBytes = source.Length;
@@ -260,17 +258,73 @@ namespace _1СBackUpManager.Services
             }
         }
 
-        private string CompressToZip(string backupFilePath)
+        private async Task<string> CompressToZipAsync(string backupFilePath, IProgress<BackupProgress>? progress = null, CancellationToken cancellationToken = default)
         {
+
             string zipFilePath = Path.ChangeExtension(backupFilePath, ".zip");
+                 
+            try
+            {
+                using (ZipArchive archive = ZipFile.Open(zipFilePath, ZipArchiveMode.Create)) 
+                {
+                    ZipArchiveEntry entry = archive.CreateEntry(Path.GetFileName(backupFilePath), CompressionLevel.Optimal);
 
-            using ZipArchive archive = ZipFile.Open(zipFilePath, ZipArchiveMode.Create);
-            archive.CreateEntryFromFile(backupFilePath, Path.GetFileName(backupFilePath),CompressionLevel.Optimal);
+                    await using FileStream source = new(
+                           backupFilePath,
+                           FileMode.Open,
+                           FileAccess.Read,
+                           FileShare.Read,
+                           bufferSize: 81920,
+                           useAsync: true);
 
-            File.Delete(backupFilePath);
-            
-            return zipFilePath;
+                    using Stream destination = entry.Open();
 
+                    byte[] buffer = new byte[4 * 1024 * 1024];
+
+                    long totalBytes = source.Length;
+                    long copiedBytes = 0;
+                    int bytesRead;
+                    int lastPercent = -1;
+
+                    while ((bytesRead = await source.ReadAsync(buffer, cancellationToken)) > 0)
+                    {
+
+                        await destination.WriteAsync(
+                            buffer.AsMemory(0, bytesRead),
+                            cancellationToken);
+
+                        copiedBytes += bytesRead;
+
+                        int percent = (int)(copiedBytes * 100 / totalBytes);
+
+                        if (percent != lastPercent)
+                        {
+                            lastPercent = percent;
+
+                            progress?.Report(new BackupProgress
+                            {
+                                Percent = percent,
+                                Message = "Стиснення..."
+                            });
+                        }
+                    }
+                    progress?.Report(new BackupProgress
+                    {
+                        Percent = 100,
+                        Message = "Стиснення завершено"
+                    });
+                }
+                File.Delete(backupFilePath);
+
+                return zipFilePath;
+            }
+            catch (OperationCanceledException)
+            {
+                if (File.Exists(zipFilePath))
+                    File.Delete(zipFilePath);
+
+                throw;
+            }
         }
     }
 }

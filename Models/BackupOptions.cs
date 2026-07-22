@@ -7,9 +7,9 @@ namespace _1СBackUpManager.Models
 {
     internal class BackupOptions
     {
-        public string BackupFolder { get; set; }
+        public string BackupFolder { get; set; } = string.Empty;
 
-        public BackupType BackupType { get; set; }
+        public BackupType BackupType { get; set; } = BackupType.CD;
 
         public bool CompressToZip { get; set; }
     }

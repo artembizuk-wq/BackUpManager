@@ -8,7 +8,7 @@ namespace _1СBackUpManager.Services
 {
     internal class CredentialService
     {
-       
+    
         // 32 байти = AES-256
         private static readonly byte[] Key =
         [
@@ -45,6 +45,9 @@ namespace _1СBackUpManager.Services
 
         public Credentials Load()
         {
+            if (!File.Exists(AppPaths.CredentialsFilePath))
+                return null;
+
             using Aes aes = Aes.Create();
             aes.Key = Key;
             aes.IV = IV;

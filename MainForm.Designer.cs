@@ -70,7 +70,7 @@
             btnRefresh.Size = new Size(25, 25);
             btnRefresh.TabIndex = 0;
             btnRefresh.UseVisualStyleBackColor = true;
-            btnRefresh.Click += button1_Click;
+            btnRefresh.Click += btnRefresh_Click;
             // 
             // clbBases
             // 
@@ -81,7 +81,6 @@
             clbBases.Name = "clbBases";
             clbBases.Size = new Size(333, 166);
             clbBases.TabIndex = 1;
-            clbBases.SelectedIndexChanged += clbBases_SelectedIndexChanged;
             // 
             // btnBackup
             // 
@@ -304,7 +303,7 @@
             lblstatus.Size = new Size(163, 19);
             lblstatus.TabIndex = 8;
             lblstatus.TextAlign = ContentAlignment.MiddleLeft;
-            lblstatus.Click += label2_Click;
+      
             // 
             // labelpersent
             // 

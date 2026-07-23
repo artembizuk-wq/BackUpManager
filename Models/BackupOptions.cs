@@ -12,6 +12,8 @@ namespace _1СBackUpManager.Models
         public BackupType BackupType { get; set; } = BackupType.CD;
 
         public bool CompressToZip { get; set; }
+
+        public string OneCExePath { get; set; } = string.Empty;
     }
 
 

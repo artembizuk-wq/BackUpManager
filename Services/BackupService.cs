@@ -49,7 +49,7 @@ namespace _1СBackUpManager.Services
 
             ProcessStartInfo startInfo = new()
                 {
-                    FileName = OneCExecutable,
+                    FileName = options.OneCExePath,
                     Arguments = arguments,
                     UseShellExecute = false,
                     CreateNoWindow = true,
@@ -110,7 +110,13 @@ namespace _1СBackUpManager.Services
         private string BuildDesignerArguments( BaseInfo baseInfo,string dtFilePath)
         {
             CredentialService credentialService = new();
-            Credentials credentials = credentialService.Load();
+            Credentials? credentials = credentialService.Load();
+
+            if (credentials is null)
+            {
+                throw new InvalidOperationException(
+                    "Не знайдено облікових даних для запуску 1С.");
+            }
 
             return string.Join(" ",
             [

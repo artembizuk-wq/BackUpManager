@@ -2,6 +2,7 @@ using _1СBackUpManager.Enums;
 using _1СBackUpManager.Models;
 using _1СBackUpManager.Services;
 using System.Diagnostics;
+using static System.Windows.Forms.Design.AxImporter;
 
 
 
@@ -14,6 +15,7 @@ namespace _1СBackUpManager
         private readonly SettingsService _settingsService = new SettingsService();
         private readonly BackupService _backupService = new BackupService();
         private CancellationTokenSource? _cts;
+        private BackupOptions _options = new();
 
         public MainForm()
         {
@@ -27,12 +29,18 @@ namespace _1СBackUpManager
             {
                 _loadingSettings = true;
                 btnCancel.Enabled = false;
-                BackupOptions options = _settingsService.Load();
+                _options = _settingsService.Load();
+
+                if (string.IsNullOrWhiteSpace(_options.OneCExePath)||!File.Exists(_options.OneCExePath))
+                {
+                    _options.OneCExePath = new OneCFinder().FindDesigner();
+                    _settingsService.Save(_options);
+                }
+                txtBackupFolder.Text = _options.BackupFolder;
+                rbDT.Checked = _options.BackupType == BackupType.DT;
+                rbCD.Checked = _options.BackupType == BackupType.CD;
+                cbZip.Checked = _options.CompressToZip;
               
-                txtBackupFolder.Text = options.BackupFolder;
-                rbDT.Checked = options.BackupType == BackupType.DT;
-                rbCD.Checked = options.BackupType == BackupType.CD;
-                cbZip.Checked = options.CompressToZip;
             }
             catch (Exception ex)
             {
@@ -48,7 +56,6 @@ namespace _1СBackUpManager
         // ====================================================
         private void Log(string message, LogType type = LogType.Info)
         {
-            {
                 Color color = type switch
                 {
                     LogType.Success => Color.ForestGreen,
@@ -65,8 +72,7 @@ namespace _1СBackUpManager
 
                 rtbLog.SelectionColor = rtbLog.ForeColor;
 
-                rtbLog.ScrollToCaret();
-            }
+                rtbLog.ScrollToCaret();       
         }
 
         private void SaveSettings()
@@ -74,25 +80,15 @@ namespace _1СBackUpManager
             if (_loadingSettings)
                 return;
 
-            BackupOptions options = new BackupOptions();
+            
+            _options.BackupFolder = txtBackupFolder.Text;
+            _options.BackupType = rbDT.Checked ? BackupType.DT : BackupType.CD;
+            _options.CompressToZip = cbZip.Checked;
 
-            options.BackupFolder = txtBackupFolder.Text;
-            options.BackupType = rbDT.Checked ? BackupType.DT : BackupType.CD;
-            options.CompressToZip = cbZip.Checked;
-
-            _settingsService.Save(options);
+            _settingsService.Save(_options);
         }
 
-        private BackupOptions GetBackupOptions()
-        {
-            BackupOptions options = new BackupOptions();
-            options.BackupFolder = txtBackupFolder.Text;
-            options.BackupType = rbDT.Checked ? BackupType.DT : BackupType.CD;
-            options.CompressToZip = cbZip.Checked;
-
-            return options;
-        }
-
+      
         // ====================================================
         // Події контролів
         // ====================================================
@@ -127,10 +123,10 @@ namespace _1СBackUpManager
             {
 
                 Log("Початок резервного копіювання...");
-                BackupOptions options = GetBackupOptions();
+                SaveSettings();
 
 
-                if (options.BackupType == BackupType.DT)
+                if (_options.BackupType == BackupType.DT)
                 {
                     progressBarBackup.Style = ProgressBarStyle.Marquee;
                     lblstatus.Text = "Створення резервної копії...";
@@ -156,14 +152,14 @@ namespace _1СBackUpManager
                 foreach (BaseInfo baseInfo in clbBases.CheckedItems)
                 {
                     Log($"Починаю резервне копіювання {baseInfo.Name}...");
-                    if (options.BackupType == BackupType.CD)
+                    if (_options.BackupType == BackupType.CD)
                     {
                         progressBarBackup.Value = 0;
                     }
 
                     try
                     {
-                        string backupFilePath = await _backupService.BackupAsync(baseInfo, options, progress, _cts.Token);
+                        string backupFilePath = await _backupService.BackupAsync(baseInfo, _options, progress, _cts.Token);
                         Log($"✔ {baseInfo.Name} успішно.", LogType.Success);
                         Log($"Файл: {backupFilePath}", LogType.Success);
                     }
@@ -204,7 +200,7 @@ namespace _1СBackUpManager
             }
         }
 
-        private void button1_Click(object sender, EventArgs e)
+        private void btnRefresh_Click(object sender, EventArgs e)
         {
             RefreshBaseList();
         }
@@ -225,19 +221,11 @@ namespace _1СBackUpManager
             SaveSettings();
         }
 
-        private void label2_Click(object sender, EventArgs e)
-        {
-
-        }
-
         private void buttonCancel_Click(object sender, EventArgs e)
         {
             _cts?.Cancel();
+  
         }
 
-        private void clbBases_SelectedIndexChanged(object sender, EventArgs e)
-        {
-
-        }
     }
 }

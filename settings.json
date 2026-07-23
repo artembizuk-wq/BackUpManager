@@ -1,5 +1,6 @@
 {
   "BackupFolder": "D:\\BackUp",
   "BackupType": "DT",
-  "CompressToZip": true
+  "CompressToZip": true,
+  "OneCExePath": ""
 }

@@ -1,4 +1,5 @@
 ﻿using _1СBackUpManager.Models;
+using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -45,14 +46,23 @@ namespace _1СBackUpManager.Services
 
         public Credentials Load()
         {
-            if (!File.Exists(AppPaths.CredentialsFilePath))
-                return null;
-
+           
             using Aes aes = Aes.Create();
             aes.Key = Key;
             aes.IV = IV;
 
-            using FileStream fileStream = File.OpenRead(AppPaths.CredentialsFilePath);
+
+            Assembly assembly = Assembly.GetExecutingAssembly();
+
+            string? resourceName = assembly
+                .GetManifestResourceNames()
+                .FirstOrDefault(x => x.EndsWith("credentials.dat"));
+
+            if (resourceName == null)
+                throw new FileNotFoundException("Не знайдено вбудований ресурс credentials.dat.");
+
+            using Stream fileStream = assembly.GetManifestResourceStream(resourceName)!;
+
             using CryptoStream crypto = new(fileStream, aes.CreateDecryptor(), CryptoStreamMode.Read);
             using StreamReader reader = new(crypto);
 

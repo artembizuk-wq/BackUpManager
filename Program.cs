@@ -1,5 +1,6 @@
 using _1СBackUpManager.Models;
 using _1СBackUpManager.Services;
+using System.Reflection;
 
 namespace _1СBackUpManager
 {
@@ -17,7 +18,8 @@ namespace _1СBackUpManager
             //Application.Run(new MainForm());
             try
             {
-               
+
+
                 ApplicationConfiguration.Initialize();
                 Application.Run(new MainForm());  
 

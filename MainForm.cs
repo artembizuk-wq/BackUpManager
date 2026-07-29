@@ -2,6 +2,8 @@ using _1СBackUpManager.Enums;
 using _1СBackUpManager.Models;
 using _1СBackUpManager.Services;
 using System.Diagnostics;
+using System.Reflection;
+using System.Xml.Linq;
 using static System.Windows.Forms.Design.AxImporter;
 
 
@@ -24,14 +26,14 @@ namespace _1СBackUpManager
 
         private void MainForm_Load(object sender, EventArgs e)
         {
-           
+
             try
             {
                 _loadingSettings = true;
                 btnCancel.Enabled = false;
                 _options = _settingsService.Load();
 
-                if (string.IsNullOrWhiteSpace(_options.OneCExePath)||!File.Exists(_options.OneCExePath))
+                if (string.IsNullOrWhiteSpace(_options.OneCExePath) || !File.Exists(_options.OneCExePath))
                 {
                     _options.OneCExePath = new OneCFinder().FindDesigner();
                     _settingsService.Save(_options);
@@ -40,7 +42,7 @@ namespace _1СBackUpManager
                 rbDT.Checked = _options.BackupType == BackupType.DT;
                 rbCD.Checked = _options.BackupType == BackupType.CD;
                 cbZip.Checked = _options.CompressToZip;
-              
+
             }
             catch (Exception ex)
             {
@@ -48,7 +50,7 @@ namespace _1СBackUpManager
             }
             finally { _loadingSettings = false; }
 
-            RefreshBaseList();   
+            RefreshBaseList();
         }
 
         // ====================================================
@@ -56,23 +58,23 @@ namespace _1СBackUpManager
         // ====================================================
         private void Log(string message, LogType type = LogType.Info)
         {
-                Color color = type switch
-                {
-                    LogType.Success => Color.ForestGreen,
-                    LogType.Error => Color.Firebrick,
-                    _ => Color.Black
-                };
+            Color color = type switch
+            {
+                LogType.Success => Color.ForestGreen,
+                LogType.Error => Color.Firebrick,
+                _ => Color.Black
+            };
 
-                rtbLog.SelectionStart = rtbLog.TextLength;
-                rtbLog.SelectionLength = 0;
+            rtbLog.SelectionStart = rtbLog.TextLength;
+            rtbLog.SelectionLength = 0;
 
-                rtbLog.SelectionColor = color;
+            rtbLog.SelectionColor = color;
 
-                rtbLog.AppendText($"{DateTime.Now:HH:mm:ss} {message}{Environment.NewLine}");
+            rtbLog.AppendText($"{DateTime.Now:HH:mm:ss} {message}{Environment.NewLine}");
 
-                rtbLog.SelectionColor = rtbLog.ForeColor;
+            rtbLog.SelectionColor = rtbLog.ForeColor;
 
-                rtbLog.ScrollToCaret();       
+            rtbLog.ScrollToCaret();
         }
 
         private void SaveSettings()
@@ -80,7 +82,7 @@ namespace _1СBackUpManager
             if (_loadingSettings)
                 return;
 
-            
+
             _options.BackupFolder = txtBackupFolder.Text;
             _options.BackupType = rbDT.Checked ? BackupType.DT : BackupType.CD;
             _options.CompressToZip = cbZip.Checked;
@@ -88,7 +90,7 @@ namespace _1СBackUpManager
             _settingsService.Save(_options);
         }
 
-      
+
         // ====================================================
         // Події контролів
         // ====================================================
@@ -224,8 +226,14 @@ namespace _1СBackUpManager
         private void buttonCancel_Click(object sender, EventArgs e)
         {
             _cts?.Cancel();
-  
+
         }
 
+
+        private void проПрограмуToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            using var aboutForm = new AboutForm();
+            aboutForm.ShowDialog(this);
+        }
     }
 }

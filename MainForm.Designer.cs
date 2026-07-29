@@ -42,7 +42,6 @@
             groupBox2 = new GroupBox();
             flowLayoutPanel1 = new FlowLayoutPanel();
             btnCancel = new Button();
-            panel1 = new Panel();
             groupBox3 = new GroupBox();
             tableLayoutPanel1 = new TableLayoutPanel();
             rtbLog = new RichTextBox();
@@ -50,12 +49,19 @@
             progressBarBackup = new ProgressBar();
             lblstatus = new Label();
             labelpersent = new Label();
+            panel1 = new Panel();
+            menuStrip1 = new MenuStrip();
+            файлToolStripMenuItem = new ToolStripMenuItem();
+            вихідToolStripMenuItem = new ToolStripMenuItem();
+            довідкаToolStripMenuItem = new ToolStripMenuItem();
+            проПрограмуToolStripMenuItem = new ToolStripMenuItem();
             groupBox1.SuspendLayout();
             groupBox2.SuspendLayout();
             flowLayoutPanel1.SuspendLayout();
             groupBox3.SuspendLayout();
             tableLayoutPanel1.SuspendLayout();
             tableLayoutPanel2.SuspendLayout();
+            menuStrip1.SuspendLayout();
             SuspendLayout();
             // 
             // btnRefresh
@@ -209,14 +215,6 @@
             btnCancel.UseVisualStyleBackColor = true;
             btnCancel.Click += buttonCancel_Click;
             // 
-            // panel1
-            // 
-            panel1.Dock = DockStyle.Top;
-            panel1.Location = new Point(3, 19);
-            panel1.Name = "panel1";
-            panel1.Size = new Size(330, 22);
-            panel1.TabIndex = 3;
-            // 
             // groupBox3
             // 
             groupBox3.Anchor = AnchorStyles.Left | AnchorStyles.Right;
@@ -241,14 +239,14 @@
             tableLayoutPanel1.Controls.Add(rtbLog, 0, 3);
             tableLayoutPanel1.Controls.Add(tableLayoutPanel2, 0, 2);
             tableLayoutPanel1.Dock = DockStyle.Fill;
-            tableLayoutPanel1.Location = new Point(0, 0);
+            tableLayoutPanel1.Location = new Point(0, 24);
             tableLayoutPanel1.Name = "tableLayoutPanel1";
             tableLayoutPanel1.RowCount = 3;
             tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Absolute, 224F));
             tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Absolute, 0F));
             tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Absolute, 25F));
             tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Absolute, 21F));
-            tableLayoutPanel1.Size = new Size(684, 461);
+            tableLayoutPanel1.Size = new Size(684, 437);
             tableLayoutPanel1.TabIndex = 10;
             // 
             // rtbLog
@@ -262,7 +260,7 @@
             rtbLog.Location = new Point(3, 252);
             rtbLog.Name = "rtbLog";
             rtbLog.ReadOnly = true;
-            rtbLog.Size = new Size(678, 206);
+            rtbLog.Size = new Size(678, 182);
             rtbLog.TabIndex = 11;
             rtbLog.Text = "";
             rtbLog.WordWrap = false;
@@ -303,7 +301,6 @@
             lblstatus.Size = new Size(163, 19);
             lblstatus.TabIndex = 8;
             lblstatus.TextAlign = ContentAlignment.MiddleLeft;
-      
             // 
             // labelpersent
             // 
@@ -316,6 +313,50 @@
             labelpersent.Text = "%";
             labelpersent.TextAlign = ContentAlignment.MiddleLeft;
             // 
+            // panel1
+            // 
+            panel1.Dock = DockStyle.Top;
+            panel1.Location = new Point(3, 19);
+            panel1.Name = "panel1";
+            panel1.Size = new Size(330, 22);
+            panel1.TabIndex = 3;
+            // 
+            // menuStrip1
+            // 
+            menuStrip1.Items.AddRange(new ToolStripItem[] { файлToolStripMenuItem, довідкаToolStripMenuItem });
+            menuStrip1.Location = new Point(0, 0);
+            menuStrip1.Name = "menuStrip1";
+            menuStrip1.Size = new Size(684, 24);
+            menuStrip1.TabIndex = 11;
+            menuStrip1.Text = "menuStrip1";
+            // 
+            // файлToolStripMenuItem
+            // 
+            файлToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { вихідToolStripMenuItem });
+            файлToolStripMenuItem.Name = "файлToolStripMenuItem";
+            файлToolStripMenuItem.Size = new Size(48, 20);
+            файлToolStripMenuItem.Text = "Файл";
+            // 
+            // вихідToolStripMenuItem
+            // 
+            вихідToolStripMenuItem.Name = "вихідToolStripMenuItem";
+            вихідToolStripMenuItem.Size = new Size(180, 22);
+            вихідToolStripMenuItem.Text = "Вихід";
+            // 
+            // довідкаToolStripMenuItem
+            // 
+            довідкаToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { проПрограмуToolStripMenuItem });
+            довідкаToolStripMenuItem.Name = "довідкаToolStripMenuItem";
+            довідкаToolStripMenuItem.Size = new Size(61, 20);
+            довідкаToolStripMenuItem.Text = "Довідка";
+            // 
+            // проПрограмуToolStripMenuItem
+            // 
+            проПрограмуToolStripMenuItem.Name = "проПрограмуToolStripMenuItem";
+            проПрограмуToolStripMenuItem.Size = new Size(180, 22);
+            проПрограмуToolStripMenuItem.Text = "Про програму...";
+            проПрограмуToolStripMenuItem.Click += проПрограмуToolStripMenuItem_Click;
+            // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -323,6 +364,8 @@
             BackColor = Color.White;
             ClientSize = new Size(684, 461);
             Controls.Add(tableLayoutPanel1);
+            Controls.Add(menuStrip1);
+            MainMenuStrip = menuStrip1;
             MinimumSize = new Size(700, 500);
             Name = "MainForm";
             StartPosition = FormStartPosition.CenterScreen;
@@ -340,7 +383,10 @@
             tableLayoutPanel1.ResumeLayout(false);
             tableLayoutPanel2.ResumeLayout(false);
             tableLayoutPanel2.PerformLayout();
+            menuStrip1.ResumeLayout(false);
+            menuStrip1.PerformLayout();
             ResumeLayout(false);
+            PerformLayout();
         }
 
         #endregion
@@ -363,8 +409,13 @@
         private Label lblstatus;
         private TableLayoutPanel tableLayoutPanel2;
         private Label labelpersent;
-        private Panel panel1;
         private Button btnCancel;
         private FlowLayoutPanel flowLayoutPanel1;
+        private Panel panel1;
+        private MenuStrip menuStrip1;
+        private ToolStripMenuItem файлToolStripMenuItem;
+        private ToolStripMenuItem вихідToolStripMenuItem;
+        private ToolStripMenuItem довідкаToolStripMenuItem;
+        private ToolStripMenuItem проПрограмуToolStripMenuItem;
     }
 }
